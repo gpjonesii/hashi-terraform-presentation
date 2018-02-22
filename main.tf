@@ -7,18 +7,33 @@ resource "azurerm_resource_group" "myresourcegroup" {
     }
 }
 
-module "network" {
-    source              = "Azure/network/azurerm"
+resource "azurerm_virtual_network" "dsvmnetwork" {
+    name                = "dsvmVnet"
+    address_space       = ["10.0.0.0/16"]
+    location            = "East US"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
-    location            = "${var.location}"
-    address_space       = "10.0.0.0/16"
-    subnet_prefixes     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-    subnet_names        = ["subnet1", "subnet2", "subnet3"]
 
-    tags                = {
-                            environment = "${var.environment}"
-                            costcenter  = "it"
-                          }
+    tags {
+        environment = "${var.environment}"
+    }
+}
+
+resource "azurerm_subnet" "dsvmsubnet" {
+    name                 = "dsvmSubnet"
+    resource_group_name  = "${azurerm_resource_group.dsvmresourcegroup.name}"
+    virtual_network_name = "${azurerm_virtual_network.dsvmnetwork.name}"
+    address_prefix       = "10.0.2.0/24"
+}
+
+resource "azurerm_public_ip" "dsvmpublicip" {
+    name                         = "dsvmPublicIP"
+    location                     = "East US"
+    resource_group_name          = "${azurerm_resource_group.dsvmresourcegroup.name}"
+    public_ip_address_allocation = "dynamic"
+
+    tags {
+        environment = "${var.environment}"
+    }
 }
 
 resource "azurerm_network_security_group" "dsvmpublicipnsg" {
