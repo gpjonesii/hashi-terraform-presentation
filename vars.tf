@@ -1,6 +1,6 @@
 variable "location" {
     description = "Azure Region all resources will be deployed to"
-    default = "US East 2"
+    default = "eastus2"
 }
 
 variable "environment" {
