@@ -1,6 +1,6 @@
-resource "azurerm_resource_group" "myresourcegroup" {
+resource "azurerm_resource_group" "dsvmresourcegroup" {
     name     = "dsvmResourceGroup"
-    location = "${var.location}"
+    location = "East US"
 
     tags {
         environment = "${var.environment}"
@@ -10,7 +10,7 @@ resource "azurerm_resource_group" "myresourcegroup" {
 resource "azurerm_virtual_network" "dsvmnetwork" {
     name                = "dsvmVnet"
     address_space       = ["10.0.0.0/16"]
-    location            = "East US"
+    location            = "${var.location}"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
 
     tags {
@@ -27,7 +27,7 @@ resource "azurerm_subnet" "dsvmsubnet" {
 
 resource "azurerm_public_ip" "dsvmpublicip" {
     name                         = "dsvmPublicIP"
-    location                     = "East US"
+    location                     = "${var.location}"
     resource_group_name          = "${azurerm_resource_group.dsvmresourcegroup.name}"
     public_ip_address_allocation = "dynamic"
 
@@ -134,6 +134,15 @@ resource "azurerm_network_interface" "dsvmnic" {
     }
 }
 
+resource "random_id" "randomId" {
+    keepers = {
+        # Generate a new ID only when a new resource group is defined
+        resource_group = "${azurerm_resource_group.dsvmresourcegroup.name}"
+    }
+
+    byte_length = 8
+}
+
 resource "azurerm_storage_account" "dsvmstorageaccount" {
     name                = "diag${random_id.randomId.hex}"
     resource_group_name = "${azurerm_resource_group.dsvmresourcegroup.name}"
@@ -176,7 +185,7 @@ resource "azurerm_virtual_machine" "dsvmvm" {
     os_profile {
         computer_name  = "dsvm"
         admin_username = "azureuser"
-        admin_password = "MScntk2018!"
+        admin_password = "MScntk2017!"
     }
 
     os_profile_linux_config {
